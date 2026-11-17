@@ -8,8 +8,18 @@ on:
 
 jobs:
   mac:
-    name: Installa e prova su macOS
-    runs-on: macos-latest
+    # Due Mac in parallelo: i Mac con chip Apple su GitHub a volte restano in coda
+    # per mancanza di macchine libere, quelli Intel hanno code separate.
+    name: Installa e prova su macOS (${{ matrix.nome }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-latest
+            nome: Apple Silicon
+          - runner: macos-15-intel
+            nome: Intel
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     env:
       DEST: /Users/runner/Library/Application Support/AudioDownloader
@@ -73,24 +83,26 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshot-mac
+          name: screenshot-${{ matrix.runner }}
           path: shots/
           if-no-files-found: warn
 
   pacchetto:
+    # Su Linux: non serve un Mac per fare lo zip (e non si aspetta in coda).
+    # zip conserva i permessi di esecuzione, che il Mac rispetta all'apertura.
     name: Prepara lo zip per gli amici
-    needs: mac
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Crea Audio-Downloader-Mac.zip
         run: |
           mkdir -p "dist/Audio Downloader"
           cp -R app installer "Installa Audio Downloader.command" "Disinstalla Audio Downloader.command" LEGGIMI.txt "dist/Audio Downloader/"
+          find "dist/Audio Downloader" -name "__pycache__" -prune -exec rm -rf {} +
           chmod +x "dist/Audio Downloader/"*.command "dist/Audio Downloader/installer/"*.sh
           cd dist
-          ditto -c -k --keepParent "Audio Downloader" Audio-Downloader-Mac.zip
-          unzip -l Audio-Downloader-Mac.zip
+          zip -r -q -X Audio-Downloader-Mac.zip "Audio Downloader"
+          zipinfo Audio-Downloader-Mac.zip
       - uses: actions/upload-artifact@v4
         with:
           name: Audio-Downloader-Mac
