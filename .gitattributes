@@ -1,0 +1,5 @@
+# Gli script per Mac devono avere fine riga Unix, anche se scritti su Windows
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.icns binary

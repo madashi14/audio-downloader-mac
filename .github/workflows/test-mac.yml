@@ -1,0 +1,97 @@
+name: Test su Mac
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  mac:
+    name: Installa e prova su macOS
+    runs-on: macos-latest
+    timeout-minutes: 60
+    env:
+      DEST: /Users/runner/Library/Application Support/AudioDownloader
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installa come farebbe un amico
+        run: AUDIODL_NON_APRIRE=1 bash installer/installa.sh
+
+      - name: Cosa è stato installato
+        run: |
+          sw_vers
+          uname -m
+          "$DEST/env/bin/python" -c "import sys, tkinter; r = tkinter.Tk(); print(sys.version); print('Tk', r.tk.call('info', 'patchlevel'), r.tk.call('tk', 'windowingsystem')); r.destroy()"
+          "$DEST/env/bin/ffmpeg" -hide_banner -version | head -1
+          "$DEST/env/bin/deno" --version | head -1
+          "$DEST/env/bin/python" -m pip list 2>/dev/null | grep -iE "yt-dlp|customtkinter|pillow|pyobjc-framework-Cocoa|deno"
+          du -sh "$DEST"
+          ls -la "/Applications/Audio Downloader.app/Contents" "/Applications/Audio Downloader.app/Contents/MacOS" "/Applications/Audio Downloader.app/Contents/Resources"
+          cat "/Applications/Audio Downloader.app/Contents/MacOS/AudioDownloader"
+
+      - name: Download da SoundCloud
+        run: '"$DEST/env/bin/python" tests/test_download.py soundcloud "$RUNNER_TEMP/dl-soundcloud"'
+
+      - name: Download da YouTube (dai server di GitHub YouTube a volte blocca i download)
+        continue-on-error: true
+        run: '"$DEST/env/bin/python" tests/test_download.py youtube "$RUNNER_TEMP/dl-youtube"'
+
+      - name: Interfaccia grafica, con screenshot
+        run: '"$DEST/env/bin/python" tests/test_gui.py "$RUNNER_TEMP/dl-gui" shots'
+
+      - name: Apri l'app da Applicazioni, come farebbe un amico
+        run: |
+          open "/Applications/Audio Downloader.app"
+          sleep 25
+          screencapture -x "shots/6_app_aperta_da_applicazioni.png" || true
+          echo "--- processo:"
+          pgrep -fl "AudioDownloader/app/gui.py"
+          echo "--- log di avvio:"
+          cat "$DEST/avvio.log" || true
+          pkill -f "AudioDownloader/app/gui.py" || true
+
+      - name: Reinstalla sopra (aggiornamento)
+        run: AUDIODL_NON_APRIRE=1 bash installer/installa.sh
+
+      - name: Disinstalla
+        run: |
+          bash "$DEST/disinstalla.sh"
+          test ! -e "/Applications/Audio Downloader.app"
+          test ! -e "$DEST"
+
+      - name: Installa dal link GitHub (curl | bash)
+        if: github.event_name != 'pull_request'
+        run: |
+          curl -fsSL "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/installer/installa.sh" \
+            | AUDIODL_NON_APRIRE=1 bash
+          test -x "/Applications/Audio Downloader.app/Contents/MacOS/AudioDownloader"
+          "$DEST/env/bin/python" tests/test_download.py
+
+      - name: Carica gli screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-mac
+          path: shots/
+          if-no-files-found: warn
+
+  pacchetto:
+    name: Prepara lo zip per gli amici
+    needs: mac
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crea Audio-Downloader-Mac.zip
+        run: |
+          mkdir -p "dist/Audio Downloader"
+          cp -R app installer "Installa Audio Downloader.command" "Disinstalla Audio Downloader.command" LEGGIMI.txt "dist/Audio Downloader/"
+          chmod +x "dist/Audio Downloader/"*.command "dist/Audio Downloader/installer/"*.sh
+          cd dist
+          ditto -c -k --keepParent "Audio Downloader" Audio-Downloader-Mac.zip
+          unzip -l Audio-Downloader-Mac.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Audio-Downloader-Mac
+          path: dist/Audio-Downloader-Mac.zip
