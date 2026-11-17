@@ -41,7 +41,7 @@ main() {
     fi
 
     printf '\n\033[1m♫  Installazione di %s\033[0m\n' "$NOME_APP"
-    echo "Ci vorranno alcuni minuti (scarica circa 300 MB). Non serve la password."
+    echo "Ci vorranno alcuni minuti e circa 700 MB di spazio libero. Non serve la password."
 
     # ------------------------------------------------------------------ 1
     titolo "1/5  Preparo i file dell'app"

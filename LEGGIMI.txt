@@ -9,7 +9,9 @@ COME SI INSTALLA
 3. Si apre una finestra del Terminale: aspetta qualche minuto finché scrive "Fatto!".
    L'app si apre da sola e da quel momento la trovi in Applicazioni.
 
-Non serve la password. L'installazione scarica circa 300 MB da internet.
+Non serve la password. Servono una connessione a internet e circa 700 MB di spazio libero.
+
+SE YOUTUBE DICE "dimostra che non sei un robot": spegni la VPN o riprova più tardi.
 
 AGGIORNARE: rifai doppio clic su "Installa Audio Downloader.command".
 DISINSTALLARE: doppio clic su "Disinstalla Audio Downloader.command" (gli MP3 restano).

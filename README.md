@@ -17,7 +17,7 @@ Funziona con brani singoli, playlist e album. Tema chiaro e scuro.
 3. Aspetta qualche minuto. Alla fine l'app si apre da sola e la trovi in **Applicazioni** (o con Spotlight scrivendo "Audio").
 
 Non serve la password e non viene toccato nient'altro sul Mac: Python, ffmpeg e il resto finiscono nella cartella
-`~/Library/Application Support/AudioDownloader` (circa __SPAZIO__).
+`~/Library/Application Support/AudioDownloader` (circa 700 MB).
 
 ## Installazione con doppio clic (alternativa)
 
@@ -43,10 +43,17 @@ oppure fai doppio clic su **Disinstalla Audio Downloader.command** nella cartell
 
 ## Requisiti
 
-- macOS 11 (Big Sur) o più recente
-- Mac con Apple Silicon (M1, M2, M3, M4…): testato automaticamente a ogni modifica
-- Mac Intel: dovrebbe funzionare, ma non viene testato
-- Connessione a internet (l'installazione scarica circa 300 MB)
+- Mac con Apple Silicon (M1, M2, M3, M4…) o Intel: entrambi testati automaticamente a ogni modifica
+  (macOS 26 su Apple Silicon, macOS 15 su Intel; dovrebbe funzionare da macOS 11 in poi)
+- Connessione a internet e circa 700 MB di spazio libero
+
+## Problemi comuni
+
+- **"YouTube chiede di dimostrare che non sei un robot"**: YouTube a volte blocca i download da VPN,
+  reti aziendali o condivise. Spegni la VPN o riprova più tardi; SoundCloud non ha questo problema.
+- **Il Mac non apre "Installa Audio Downloader.command"**: vedi il punto 3 dell'installazione con doppio clic,
+  oppure usa il metodo con il Terminale.
+- **Qualcosa non va dopo un aggiornamento di macOS**: rifai l'installazione, sistema tutto e mantiene la cronologia.
 
 ## Uso responsabile
 
