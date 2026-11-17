@@ -37,7 +37,8 @@ jobs:
           "$DEST/env/bin/ffmpeg" -hide_banner -version | head -1
           "$DEST/env/bin/deno" --version | head -1
           "$DEST/env/bin/python" -m pip list 2>/dev/null | grep -iE "yt-dlp|customtkinter|pillow|pyobjc-framework-Cocoa|deno"
-          du -sh "$DEST"
+          du -sh "$DEST" "$DEST/env" "$DEST/mamba" 2>/dev/null || true
+          du -sh "$DEST/env/lib/python3.12/site-packages"/* 2>/dev/null | sort -h | tail -8 || true
           ls -la "/Applications/Audio Downloader.app/Contents" "/Applications/Audio Downloader.app/Contents/MacOS" "/Applications/Audio Downloader.app/Contents/Resources"
           cat "/Applications/Audio Downloader.app/Contents/MacOS/AudioDownloader"
 

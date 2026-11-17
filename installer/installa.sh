@@ -77,8 +77,10 @@ main() {
         $ARCH_CMD "$MAMBA" create -y -p "$ENV_DIR" -c conda-forge --override-channels $PACCHETTI </dev/null
     fi
     echo "Installo yt-dlp, Deno e l'interfaccia grafica…"
-    $ARCH_CMD "$ENV_DIR/bin/python" -m pip install --quiet --disable-pip-version-check --upgrade \
+    $ARCH_CMD "$ENV_DIR/bin/python" -m pip install --quiet --disable-pip-version-check --no-cache-dir --upgrade \
         "yt-dlp[default]" customtkinter pillow deno pyobjc-framework-Cocoa </dev/null
+    # i pacchetti scaricati non servono più: liberano parecchio spazio
+    "$MAMBA" clean --all --yes >/dev/null 2>&1 || true
 
     # controlli: se qualcosa manca meglio dirlo adesso che al primo download
     "$ENV_DIR/bin/python" -c "import tkinter, customtkinter, yt_dlp, PIL" \

@@ -68,6 +68,8 @@ class _LoggerSilenzioso:
 
 ERRORI_NOTI = [  # (frammento del messaggio di yt-dlp, spiegazione in italiano)
     ("Private video", "Il video è privato."),
+    ("not a bot", "YouTube chiede di dimostrare che non sei un robot: riprova tra un po' "
+                  "o da un'altra connessione (succede con VPN e reti condivise)."),
     ("video is unavailable", "Il video non è disponibile: rimosso, privato o link sbagliato."),
     ("Video unavailable", "Il video non è disponibile: rimosso, privato o link sbagliato."),
     ("confirm your age", "Il video ha limiti di età e richiede l'accesso a YouTube."),
@@ -137,7 +139,30 @@ class AudioDownloaderApp(ctk.CTk):
         self.bind("<FocusIn>", self._autoincolla)
         self.protocol("WM_DELETE_WINDOW", self._chiudi)
         self.after(100, self._leggi_coda)
-        self.after(300, self.url_entry.focus_set)
+        self.after(300, self._all_avvio)
+
+    def _all_avvio(self):
+        self._porta_in_primo_piano()
+        self.url_entry.focus_set()
+        # controlla subito gli appunti: su Mac la finestra può aprirsi senza ricevere il focus
+        self._autoincolla()
+
+    def _porta_in_primo_piano(self):
+        if MAC:
+            try:
+                from AppKit import NSApplication
+                app = NSApplication.sharedApplication()
+                if hasattr(app, "activate"):          # macOS 14+
+                    app.activate()
+                else:
+                    app.activateIgnoringOtherApps_(True)
+            except Exception:
+                pass
+        self.lift()
+        try:
+            self.focus_force()
+        except TclError:
+            pass
 
     # ------------------------------------------------------------------ UI
     def _font(self, size, weight="normal"):
